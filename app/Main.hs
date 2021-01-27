@@ -2,8 +2,12 @@
 module Main where
 
 import Lib
+import ApiType
 import Streamly
 import Streamly.Prelude
+import Servant
+-- import Network.Wai
+import Network.Wai.Handler.Warp
 
 data Coords = Coords {
     x :: Int,
@@ -45,8 +49,18 @@ instance Applicative Object where
 instance Monad Object where
     (Object _ a) >>= f = f a
 
+server :: Server InfoAPI
+server = ApiType.getInfo
+
+proxy :: Proxy InfoAPI
+proxy = Proxy
+
+app :: Application
+app = serve proxy server
+
+port :: Int
+port = 8081
+
 main :: IO ()
 main = do
-    print (Object { pos = Coords { x = 5, y = 6 }, opt = 1})
-    print (moveUp $ Object { pos = Coords { x = 5, y = 6 }, opt = 1})
-    print (moveDn $ Vehicle { pos = Coords { x = 5, y = 6 }, opt = 1})
+    run port app
